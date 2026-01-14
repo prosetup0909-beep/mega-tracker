@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lyric Cloud Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .canvas-container { background: rgba(255,255,255,0.05); border-radius: 20px; border: 2px dashed #334155; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-2 text-pink-500">LyricCloud Pro</h1>
+        <p class="text-slate-400 mb-8">Enter a Song & Artist to visualize the lyrics</p>
+
+        <div class="flex gap-2 mb-10">
+            <input id="artist" type="text" placeholder="Artist (e.g. Adele)" class="flex-1 p-4 rounded-lg bg-slate-800 border border-slate-700 outline-none">
+            <input id="song" type="text" placeholder="Song (e.g. Hello)" class="flex-1 p-4 rounded-lg bg-slate-800 border border-slate-700 outline-none">
+            <button onclick="generateCloud()" class="bg-pink-600 hover:bg-pink-700 px-8 py-4 rounded-lg font-bold">GENERATE</button>
+        </div>
+
+        <div id="loading" class="hidden mb-4 text-pink-400 animate-pulse">Fetching lyrics and analyzing patterns...</div>
+        
+        <div class="canvas-container p-4">
+            <canvas id="wordCloudCanvas" width="600" height="400" class="w-full"></canvas>
+        </div>
+    </div>
+    <script>
+    async function generateCloud() {
+        const artist = document.getElementById('artist').value;
+        const song = document.getElementById('song').value;
+        const loader = document.getElementById('loading');
+        
+        if (!artist || !song) return alert("Please enter both Artist and Song!");
+
+        loader.classList.remove('hidden');
+
+        try {
+            
+            const response = await fetch(`https://api.lyrics.ovh/v1/${artist}/${song}`);
+            const data = await response.json();
+
+            if (!data.lyrics) throw new Error("Lyrics not found");
+
+            
+            const words = data.lyrics.toLowerCase()
+                .replace(/[^\w\s]/g, "") // Remove punctuation
+                .split(/\s+/)            // Split by space
+                .filter(w => w.length > 3); // Ignore small words like 'the', 'is'
+
+            const freqMap = {};
+            words.forEach(w => freqMap[w] = (freqMap[w] || 0) + 1);
+
+            
+            const list = Object.entries(freqMap).map(([text, size]) => [text, size * 5]);
+
+            
+            WordCloud(document.getElementById('wordCloudCanvas'), { 
+                list: list,
+                gridSize: 8,
+                weightFactor: 2,
+                color: 'random-light',
+                backgroundColor: '#1e293b'
+            });
+
+        } catch (err) {
+            alert("Could not find lyrics. Try another song!");
+        } finally {
+            loader.classList.add('hidden');
+        }
+    }
+</script>
+</body>
+</html>

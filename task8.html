@@ -2,55 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Task 08 - Lyric Word Cloud</title>
+    <title>Task 08 - Reliable Word Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; }
-        .canvas-box { background: #1e293b; border-radius: 1rem; border: 2px solid #334155; }
+        body { background: #0f172a; color: white; }
+        .word-box { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; min-height: 200px; background: #1e293b; padding: 20px; border-radius: 15px; }
     </style>
 </head>
 <body class="p-6">
-    <div class="max-w-3xl mx-auto">
-        <h1 class="text-3xl font-black text-center text-pink-500 mb-6 italic">LYRIC CLOUD GENERATOR</h1>
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold text-center text-blue-400 mb-6">LYRIC WORD CLOUD</h1>
         
-        <div class="bg-slate-800 p-6 rounded-2xl shadow-xl mb-6">
-            <p class="text-slate-400 text-sm mb-2 font-bold uppercase">Paste Lyrics Below:</p>
-            <textarea id="lyricInput" class="w-full h-32 p-4 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-pink-500 outline-none mb-4" placeholder="Paste song lyrics here..."></textarea>
-            
-            <button onclick="makeCloud()" class="w-full bg-pink-600 hover:bg-pink-700 py-4 rounded-xl font-black tracking-widest transition-all">
-                GENERATE WORD CLOUD
-            </button>
-        </div>
+        <textarea id="lyrics" class="w-full h-32 p-4 rounded bg-slate-900 border border-slate-700 mb-4" placeholder="Paste lyrics here..."></textarea>
+        
+        <button onclick="processLyrics()" class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded font-bold transition">
+            CREATE CLOUD
+        </button>
 
-        <div class="canvas-box p-4 flex justify-center overflow-hidden">
-            <canvas id="cloudCanvas" width="700" height="400"></canvas>
+        <div id="cloudArea" class="word-box mt-6">
+            <p class="text-slate-500">Cloud will appear here...</p>
         </div>
     </div>
 
     <script>
-        function makeCloud() {
-            const text = document.getElementById('lyricInput').value;
-            if(!text) return alert("Please paste some lyrics first!");
+        function processLyrics() {
+            const text = document.getElementById('lyrics').value;
+            if(!text) return alert("Paste lyrics first!");
 
-            // Human logic: Clean the text and count common words
-            const words = text.toLowerCase()
-                .replace(/[^\w\s]/g, "") 
-                .split(/\s+/)
-                .filter(w => w.length > 3); // Ignore short words
+            const cloudArea = document.getElementById('cloudArea');
+            cloudArea.innerHTML = ""; // Clear area
 
-            const counts = {};
-            words.forEach(w => counts[w] = (counts[w] || 0) + 1);
+            // Step 1: Count words
+            const words = text.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(w => w.length > 3);
+            const freq = {};
+            words.forEach(w => freq[w] = (freq[w] || 0) + 1);
 
-            // Format for the library: [word, size]
-            const list = Object.entries(counts).map(([word, count]) => [word, count * 15]);
-
-            WordCloud(document.getElementById('cloudCanvas'), { 
-                list: list,
-                backgroundColor: '#1e293b',
-                color: 'random-light',
-                rotateRatio: 0.5,
-                gridSize: 10
+            // Step 2: Display words with different sizes
+            Object.keys(freq).forEach(word => {
+                const span = document.createElement('span');
+                span.innerText = word;
+                // Human Logic: Set size based on frequency
+                const size = Math.min(60, 16 + (freq[word] * 5)); 
+                span.style.fontSize = size + "px";
+                span.style.color = `hsl(${Math.random() * 360}, 70%, 70%)`;
+                span.style.fontWeight = "bold";
+                cloudArea.appendChild(span);
             });
         }
     </script>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task 11 - Student Gig Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <nav class="bg-blue-600 p-4 text-white flex justify-between shadow-md">
+        <h1 class="font-bold">GigStudent v1.0</h1>
+        <div id="userSection">
+            <span id="userName" class="text-sm mr-2">Logged in as: Student_User</span>
+            <button class="bg-blue-800 px-3 py-1 rounded text-xs">Logout</button>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="flex gap-6">
+            
+            <div class="w-2/3">
+                <h2 class="text-xl font-bold mb-4">Live Task Board</h2>
+                <div id="gigBoard" class="space-y-4">
+                    </div>
+            </div>
+
+            <div class="w-1/3">
+                <div class="bg-white p-4 rounded-lg shadow border border-slate-200">
+                    <h2 class="font-bold border-b pb-2 mb-3">My Portfolio</h2>
+                    <div id="portfolioList" class="text-xs text-slate-600 space-y-2">
+                        <p class="italic">No tasks completed yet...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Initial Gigs
+        let gigs = [
+            { id: 101, title: "Logo Design for Club", budget: "$20", postedBy: "Art_Dept" },
+            { id: 102, title: "Python Script Debugging", budget: "$15", postedBy: "CS_Major" }
+        ];
+
+        let completed = JSON.parse(localStorage.getItem('myPortfolio')) || [];
+
+        function renderBoard() {
+            const board = document.getElementById('gigBoard');
+            board.innerHTML = gigs.map(g => `
+                <div class="bg-white p-5 rounded-xl border shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-blue-700">${g.title}</h3>
+                        <span class="text-green-600 font-mono font-bold">${g.budget}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Posted by: ${g.postedBy}</p>
+                    
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="Your Bid (e.g. $18)" id="bid-${g.id}" class="text-xs p-2 border rounded flex-1">
+                        <button onclick="placeBid(${g.id})" class="bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold hover:bg-blue-600">PLACE BID</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function placeBid(id) {
+            const bidVal = document.getElementById(`bid-${id}`).value;
+            if(!bidVal) return alert("Enter a price or time bid!");
+
+            alert("Bid of " + bidVal + " submitted! Simulation: Task assigned to you.");
+            
+            // Simulation: Task moves to Portfolio immediately for the demo
+            const task = gigs.find(g => g.id === id);
+            completed.push({ title: task.title, date: new Date().toLocaleDateString() });
+            
+            // Remove from board
+            gigs = gigs.filter(g => g.id !== id);
+            
+            saveData();
+            renderBoard();
+            renderPortfolio();
+        }
+
+        function renderPortfolio() {
+            const port = document.getElementById('portfolioList');
+            if(completed.length === 0) return;
+            
+            port.innerHTML = completed.map(c => `
+                <div class="p-2 bg-blue-50 border-l-2 border-blue-400 rounded">
+                    <p class="font-bold text-blue-900">${c.title}</p>
+                    <p class="text-[10px]">Completed on: ${c.date}</p>
+                </div>
+            `).join('');
+        }
+
+        function saveData() {
+            localStorage.setItem('myPortfolio', JSON.stringify(completed));
+        }
+
+        // Run on start
+        renderBoard();
+        renderPortfolio();
+    </script>
+</body>
+</html>

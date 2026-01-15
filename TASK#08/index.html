@@ -46,9 +46,9 @@
 
             
             const words = data.lyrics.toLowerCase()
-                .replace(/[^\w\s]/g, "") // Remove punctuation
-                .split(/\s+/)            // Split by space
-                .filter(w => w.length > 3); // Ignore small words like 'the', 'is'
+                .replace(/[^\w\s]/g, "") 
+                .split(/\s+/)            
+                .filter(w => w.length > 3); 
 
             const freqMap = {};
             words.forEach(w => freqMap[w] = (freqMap[w] || 0) + 1);
